@@ -1,0 +1,149 @@
+﻿@model ContinentCountryViewModel
+@inject IContinentService ContinentService
+
+@{
+    ViewData["Title"] = "پنل اطلاعات ویروس کرونا";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-4">
+            <div class="small-box bg-red">
+                <div class="inner">
+                    <h3>@await ContinentService.GetAllInfectedNoAsync()</h3>
+                    <p>تعداد کل مبتلایان</p>
+                </div>
+                <div class="icon">
+                    <i class="fa fa-fire"></i>
+                </div>
+                <br />
+            </div>
+        </div>
+        <!-- ./col -->
+        <div class="col-lg-4 col-md-4 col-sm-4">
+            <!-- small box -->
+            <div class="small-box bg-green">
+                <div class="inner">
+                    <h3>@await ContinentService.GetAllRecoveredNoAsync()</h3>
+                    <p>تعداد کل بهبود یافته ها</p>
+                </div>
+                <div class="icon">
+                    <i class="fa fa-users"></i>
+                </div>
+                <br />
+            </div>
+        </div>
+        <!-- ./col -->
+        <div class="col-lg-4 col-md-4 col-sm-4">
+            <!-- small box -->
+            <div class="small-box bg-purple">
+                <div class="inner">
+                    <h3>@await ContinentService.GetAllDeathsNoAsync()</h3>
+                    <p>تعداد کل درگذشتگان</p>
+                </div>
+                <div class="icon">
+                    <i class="fa fa-user"></i>
+                </div>
+                <br />
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card-box">
+                <a asp-controller="Country" asp-action="Index" style="margin-bottom: 10px;"
+                   class="pull-right btn btn-primary btn-rounded waves-effect waves-light">
+                    <span style="margin-right: 5px;">بیشتر</span>
+                    <i class="fa fa-arrow-left m-l-5"></i>
+                </a>
+                <h4 class="header-title m-t-0 m-b-30">آمار ویروس کرونا به تفکیک کشور</h4>
+                @if (Model.Countries.Any())
+                {
+                    <table class="table table table-hover m-0">
+                        <thead>
+                            <tr>
+                                <th>نام کشور</th>
+                                <th>تعداد مبتلایان</th>
+                                <th>تعداد بهبود یافتگان</th>
+                                <th>تعداد درگذشتگان</th>
+                                <th>تاریخ بروز رسانی</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                foreach (var country in Model.Countries)
+                                {
+                                    <tr>
+                                        <th>@country.Name</th>
+                                        <td>@country.InfectedNo نفر</td>
+                                        <td>@country.RecoveredNo نفر</td>
+                                        <td>@country.DeathNo نفر</td>
+                                        <td>@country.RefreshDate.ToPersianDigitalDateTimeString()</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="text-center">کشوری برای نمایش وجود ندارد</div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card-box">
+                <a asp-controller="Continent" asp-action="Index" style="margin-bottom: 10px;"
+                   class="pull-right btn btn-primary btn-rounded waves-effect waves-light">
+                    <span style="margin-right: 5px;">بیشتر</span>
+                    <i class="fa fa-arrow-left m-l-5"></i>
+                </a>
+                <h4 class="header-title m-t-0 m-b-30">آمار ویروس کرونا به تفکیک قاره</h4>
+                @if (Model.Countries.Any())
+                {
+                    <table class="table table table-hover m-0">
+                        <thead>
+                            <tr>
+                                <th>نام قاره</th>
+                                <th>تعداد مبتلایان</th>
+                                <th>تعداد بهبود یافتگان</th>
+                                <th>تعداد درگذشتگان</th>
+                                <th>تاریخ بروز رسانی</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                foreach (var continent in Model.Continents)
+                                {
+                                    <tr>
+                                        <th>@continent.Name</th>
+                                        <td>@continent.InfectedNo</td>
+                                        <td>@continent.RecoveredNo</td>
+                                        <td>@continent.DeathNo</td>
+                                        @if (continent.RefreshDate.Equals(DateTime.MinValue))
+                                        {
+                                            <td>هیچ داده ای ثبت نشده است</td>
+                                        }
+                                        else
+                                        {
+                                            <td>@continent.RefreshDate.ToPersianDigitalDateTimeString()</td>
+                                        }
+
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="text-center">کشوری برای نمایش وجود ندارد</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
