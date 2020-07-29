@@ -1,12 +1,12 @@
-﻿{
+{
   "profiles": {
     "CoronaVirus": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:80",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "applicationUrl": "http://localhost:80"
     }
   }
 }
