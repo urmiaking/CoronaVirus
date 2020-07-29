@@ -13,26 +13,42 @@ namespace CoronaVirus.Services
     public class ContinentRepository : IContinentService
     {
         public IConfiguration Configuration { get; set; }
-        private readonly int port;
-        private readonly string server;
+        private readonly int continentPort;
+        private readonly string continentServer;
+        private readonly int countryPort;
+        private readonly string countryServer;
 
         public ContinentRepository(IConfiguration configuration)
         {
             Configuration = configuration;
-            port = int.Parse(Configuration["Api.Port"]);
-            server = Configuration["Api.Server"];
+            continentPort = int.Parse(Configuration["ContinentApi.Port"]);
+            continentServer = Configuration["ContinentApi.Server"];
+            countryPort = int.Parse(Configuration["CountryApi.Port"]);
+            countryServer = Configuration["CountryApi.Server"];
         }
 
         public async Task<List<Continent>> GetAllContinentsAsync()
         {
             var continentsList = new List<Continent>();
+            var countriesList = new List<Country>();
 
             using (var client = new HttpClient())
             {
-                using (var response = await client.GetAsync($"https://{server}:{port}/api/Continents"))
+                using (var response = await client.GetAsync($"http://{continentServer}:{continentPort}/api/Continents"))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
                     continentsList = JsonConvert.DeserializeObject<List<Continent>>(apiResponse);
+                }
+
+                using (var response = await client.GetAsync($"http://{countryServer}:{countryPort}/api/Countries"))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    countriesList = JsonConvert.DeserializeObject<List<Country>>(apiResponse);
+                }
+
+                foreach (var continent in continentsList)
+                {
+                    continent.Countries = countriesList.Where(a => a.ContinentId.Equals(continent.Id)).ToList();
                 }
             }
 
@@ -45,7 +61,7 @@ namespace CoronaVirus.Services
 
             using (var client = new HttpClient())
             {
-                using (var response = await client.GetAsync($"https://{server}:{port}/api/Continents/{id}"))
+                using (var response = await client.GetAsync($"http://{continentServer}:{continentPort}/api/Continents/{id}"))
                 {
                     if (!response.IsSuccessStatusCode)
                     {
@@ -53,6 +69,13 @@ namespace CoronaVirus.Services
                     }
                     string apiResponse = await response.Content.ReadAsStringAsync();
                     continent = JsonConvert.DeserializeObject<Continent>(apiResponse);
+                }
+
+                using (var response = await client.GetAsync($"http://{countryServer}:{countryPort}/api/Countries"))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    var countries = JsonConvert.DeserializeObject<List<Country>>(apiResponse);
+                    continent.Countries = countries;
                 }
             }
 
@@ -65,7 +88,7 @@ namespace CoronaVirus.Services
 
             using (var client = new HttpClient())
             {
-                using (var response = await client.GetAsync($"https://{server}:{port}/api/Continents/GetContinentByName/{name}"))
+                using (var response = await client.GetAsync($"http://{continentServer}:{continentPort}/api/Continents/GetContinentByName/{name}"))
                 {
                     if (!response.IsSuccessStatusCode)
                     {
@@ -73,6 +96,13 @@ namespace CoronaVirus.Services
                     }
                     string apiResponse = await response.Content.ReadAsStringAsync();
                     continent = JsonConvert.DeserializeObject<Continent>(apiResponse);
+                }
+
+                using (var response = await client.GetAsync($"http://{countryServer}:{countryPort}/api/Countries"))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    var countries = JsonConvert.DeserializeObject<List<Country>>(apiResponse);
+                    continent.Countries = countries;
                 }
             }
 
@@ -85,7 +115,7 @@ namespace CoronaVirus.Services
             using (var client = new HttpClient())
             {
                 StringContent content = new StringContent(JsonConvert.SerializeObject(continent), Encoding.UTF8, "application/json");
-                using (var response = await client.PostAsync($"https://{server}:{port}/api/Continents", content))
+                using (var response = await client.PostAsync($"http://{continentServer}:{continentPort}/api/Continents", content))
                 {
                     if (response.IsSuccessStatusCode)
                     {
@@ -104,7 +134,7 @@ namespace CoronaVirus.Services
             {
                 StringContent newContent = new StringContent(JsonConvert.SerializeObject(continent), Encoding.UTF8, "application/json");
 
-                using (var response = await httpClient.PutAsync($"https://{server}:{port}/api/Continents/{continent.Id}", newContent))
+                using (var response = await httpClient.PutAsync($"http://{continentServer}:{continentPort}/api/Continents/{continent.Id}", newContent))
                 {
                     if (response.IsSuccessStatusCode)
                     {
@@ -121,7 +151,7 @@ namespace CoronaVirus.Services
             var isSucceeded = false;
             using (var httpClient = new HttpClient())
             {
-                using (var response = await httpClient.DeleteAsync($"https://{server}:{port}/api/Continents/{continent.Id}"))
+                using (var response = await httpClient.DeleteAsync($"http://{continentServer}:{continentPort}/api/Continents/{continent.Id}"))
                 {
                     if (response.IsSuccessStatusCode)
                     {
